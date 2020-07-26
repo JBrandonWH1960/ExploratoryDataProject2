@@ -3,13 +3,12 @@
 ## 07/22/2020
 ##
 ##
-## Question 1
-## Plot 1 Question:  Have total emissions from PM2.5 decreased in the United States 
-## from 1999 to 2008? Using the base plotting system, make a plot showing the total 
-## PM2.5 emission from all sources for each of the years 1999, 2002, 2005, and 2008.
+##
+## Question 5
+## How have emissions from motor vehicle sources changed from 1999–2008 in Baltimore City?
 ##
 ##
-## Answer: Total decreased in the USA from 1999 to 2008
+## Answer:  Vehice emissions have decreased over time from 199 to 2008.
 ##
 ## Load necessary plotting and data libraries
 library(ggplot2)
@@ -37,28 +36,20 @@ head(NEI)
 head(SCC)
 ##
 ##
-## Converting "year", "type", "Pollutant", "SCC", "fips" to factor
-colToFactor <- c("year", "type", "Pollutant","SCC","fips")
-NEI[,colToFactor] <- lapply(NEI[,colToFactor], factor)
-head(levels(NEI$fips))
+## Create a subset of data containing the vehicles 
+## Assumption is EISector labeled "vehicle"
+vehicle<-grepl(pattern = "vehicle", SCC$EISector, ignore.case = TRUE)
+vehicleSCC <- SCC[vehicle,]$SCC
 ##
 ##
-## Data Clean - Remove extra spaces NA
-levels(NEI$fips)[1] = NA
-NEIdata<-NEI[complete.cases(NEI),]
-colSums(is.na(NEIdata))
+## using this boolean vector get the interested rows from the baltimore data
+vehicleSSC <- NEIdata[NEIdata$SCC %in% vehicleSCC, ]
+vehicleBaltimore <- subset(vehicleSSC, fips == "24510")
+vehicleBaltimoreTotEm<-aggregate(Emissions~year, vehicleBaltimore, sum)
 ##
 ##
-##Create aggregation of the data
-totalEmission <- aggregate(Emissions ~ year, NEIdata, sum)
-totalEmission
-##
-##
-##Create Bar Plot of the Emissions
-barplot(
-        (totalEmission$Emissions)/10^6,
-        names.arg=totalEmission$year,
-        xlab="Year",
-        ylab="PM2.5 Emissions (10^6 Tons)",
-        main="Total PM2.5 Emissions From All US Sources"
-)
+bPlot<-ggplot(aes(year, Emissions/10^5), data=vehicleBaltimoreTotEm)
+bPlot+geom_bar(stat="identity",fill="grey",width=0.75) +
+        guides(fill=FALSE) +
+        labs(x="year", y=expression("Total PM"[2.5]*" Emission (10^5 Tons)")) + 
+        labs(title=expression("PM"[2.5]*" Motor Vehicle Source Emissions in Baltimore from 1999-2008"))

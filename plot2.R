@@ -2,14 +2,12 @@
 ## Exploratory Data Analysis
 ## 07/22/2020
 ##
+## Question 2
+## Have total emissions from PM2.5 decreased in the Baltimore City, Maryland fips == "24510") from 
+## 1999 to 2008? Use the base plotting system to make a plot answering this question.
 ##
-## Question 1
-## Plot 1 Question:  Have total emissions from PM2.5 decreased in the United States 
-## from 1999 to 2008? Using the base plotting system, make a plot showing the total 
-## PM2.5 emission from all sources for each of the years 1999, 2002, 2005, and 2008.
+## Answer: Emissions decreased from 199 to 2002 | 2005 an Increase | followed by decrease
 ##
-##
-## Answer: Total decreased in the USA from 1999 to 2008
 ##
 ## Load necessary plotting and data libraries
 library(ggplot2)
@@ -28,37 +26,26 @@ if(!(file.exists("summarySCC_PM25.rds") &&
 }
 ##
 ##
-## Read the datafiles into datasets
+## Read the data files into datasets
 NEI <- readRDS("summarySCC_PM25.rds")
 SCC <- readRDS("Source_Classification_Code.rds")
 ##
 ## View the file records for load validation
 head(NEI)
 head(SCC)
+## Get a subset of fips data = "24510" | Baltimore City, Maryland
+## Create an aggregation by summing emisions for each year. 
+NEIBaltimore<-subset(NEIdata, fips == "24510")
+totalBaltimoreEmissions <- aggregate(Emissions ~ year, NEIBaltimore, sum)
+totalBaltimoreEmissions
 ##
 ##
-## Converting "year", "type", "Pollutant", "SCC", "fips" to factor
-colToFactor <- c("year", "type", "Pollutant","SCC","fips")
-NEI[,colToFactor] <- lapply(NEI[,colToFactor], factor)
-head(levels(NEI$fips))
 ##
-##
-## Data Clean - Remove extra spaces NA
-levels(NEI$fips)[1] = NA
-NEIdata<-NEI[complete.cases(NEI),]
-colSums(is.na(NEIdata))
-##
-##
-##Create aggregation of the data
-totalEmission <- aggregate(Emissions ~ year, NEIdata, sum)
-totalEmission
-##
-##
-##Create Bar Plot of the Emissions
+## Create a bar plot showing Baltimore City Maryland Emissions by Year.
 barplot(
-        (totalEmission$Emissions)/10^6,
-        names.arg=totalEmission$year,
+        (totalBaltimoreEmissions$Emissions)/10^6,
+        names.arg=totalBaltimoreEmissions$year,
         xlab="Year",
         ylab="PM2.5 Emissions (10^6 Tons)",
-        main="Total PM2.5 Emissions From All US Sources"
+        main="Total PM2.5 Emissions From All Baltimore City Sources"
 )
